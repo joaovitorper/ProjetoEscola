@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import '../models/turma.dart';
+import 'package:projetoescola/controllers/turma_controller.dart';
+import 'package:projetoescola/models/turma.dart';
+import 'package:projetoescola/widgets/escola_cartao.dart';
+import 'package:projetoescola/widgets/escola_pagina.dart';
 
 class TelaFormTurma extends StatefulWidget {
+  const TelaFormTurma({super.key, required this.controller, this.turma});
+  final TurmaController controller;
   final Turma? turma;
-
-  const TelaFormTurma({super.key, this.turma});
 
   @override
   State<TelaFormTurma> createState() => _TelaFormTurmaState();
@@ -21,101 +24,87 @@ class _TelaFormTurmaState extends State<TelaFormTurma> {
   @override
   void initState() {
     super.initState();
-    if (widget.turma != null) {
-      _nome = widget.turma!.nome;
-      _disciplina = widget.turma!.disciplina;
-      _professor = widget.turma!.professor;
-      _turno = widget.turma!.turno;
-      _vagas = widget.turma!.vagas;
-    } else {
-      _nome = '';
-      _disciplina = '';
-      _professor = '';
-      _turno = 'Manhã';
-      _vagas = 30;
-    }
-  }
-
-  void _salvar() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-
-      final novaTurma = Turma(
-        id: widget.turma?.id,
-        nome: _nome,
-        disciplina: _disciplina,
-        professor: _professor,
-        turno: _turno,
-        vagas: _vagas,
-      );
-
-      Navigator.pop(context, novaTurma);
-    }
+    _nome = widget.turma?.nome ?? '';
+    _disciplina = widget.turma?.disciplina ?? '';
+    _professor = widget.turma?.professor ?? '';
+    _turno = widget.turma?.turno ?? '';
+    _vagas = widget.turma?.vagas ?? 30;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.turma == null ? 'Nova Turma' : 'Editar Turma'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+    final editando = widget.turma != null;
+    return EscolaPagina(
+      titulo: editando ? 'Editar Turma' : 'Nova Turma',
+      comMenu: false,
+      child: EscolaCartao(
+        padding: const EdgeInsets.all(24),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
                 initialValue: _nome,
                 decoration: const InputDecoration(labelText: 'Nome da Turma'),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Informe o nome' : null,
+                validator: (value) => value == null || value.isEmpty ? 'Informe o nome' : null,
                 onSaved: (value) => _nome = value!,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               TextFormField(
                 initialValue: _disciplina,
                 decoration: const InputDecoration(labelText: 'Disciplina'),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Informe a disciplina' : null,
+                validator: (value) => value == null || value.isEmpty ? 'Informe a disciplina' : null,
                 onSaved: (value) => _disciplina = value!,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               TextFormField(
                 initialValue: _professor,
                 decoration: const InputDecoration(labelText: 'Professor'),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Informe o professor' : null,
+                validator: (value) => value == null || value.isEmpty ? 'Informe o professor' : null,
                 onSaved: (value) => _professor = value!,
               ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
+              const SizedBox(height: 16),
+              TextFormField(
                 initialValue: _turno,
                 decoration: const InputDecoration(labelText: 'Turno'),
-                items: const [
-                  DropdownMenuItem(value: 'Manhã', child: Text('Manhã')),
-                  DropdownMenuItem(value: 'Tarde', child: Text('Tarde')),
-                  DropdownMenuItem(value: 'Noite', child: Text('Noite')),
-                ],
-                onChanged: (value) => setState(() => _turno = value!),
+                validator: (value) => value == null || value.isEmpty ? 'Informe o turno' : null,
+                onSaved: (value) => _turno = value!,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               TextFormField(
                 initialValue: _vagas.toString(),
                 decoration: const InputDecoration(labelText: 'Vagas'),
                 keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || int.tryParse(value) == null) {
-                    return 'Informe um número válido de vagas';
-                  }
-                  return null;
-                },
+                validator: (value) => value == null || int.tryParse(value) == null ? 'Informe um número válido de vagas' : null,
                 onSaved: (value) => _vagas = int.parse(value!),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _salvar,
-                child: const Text('Salvar'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                ),
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+                    if (editando) {
+                      widget.controller.editar(widget.turma!.id!, _nome, _disciplina, _professor, _turno, _vagas);
+                    } else {
+                      bool sucesso = widget.controller.cadastrar(_nome, _disciplina, _professor, _turno, _vagas);
+                      if (!sucesso) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Já existe uma turma com este nome!')),
+                        );
+                        return;
+                      }
+                    }
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text(editando ? 'Salvar Alterações' : 'Cadastrar', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ],
           ),

@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:projetoescola/core/escola_ds.dart';
 
 import '../views/tela_aluno.dart';
+import '../views/tela_consulta.dart';
+import '../views/tela_disciplina.dart';
 import '../views/tela_home.dart';
 import '../views/tela_login.dart';
+import '../views/tela_matricula.dart';
 import '../views/tela_professor.dart';
+import '../views/tela_turma.dart';
 import 'escola_rodape.dart';
 
 class EscolaPagina extends StatelessWidget {
@@ -54,19 +58,19 @@ class EscolaPagina extends StatelessWidget {
           ),
           ListTile(
             title: const Text('Turmas'),
-            onTap: () => Navigator.pop(context),
+            onTap: () => _ir(context, const TelaTurma()),
           ),
           ListTile(
             title: const Text('Disciplinas'),
-            onTap: () => Navigator.pop(context),
+            onTap: () => _ir(context, const TelaDisciplina()),
           ),
           ListTile(
             title: const Text('Matrículas'),
-            onTap: () => Navigator.pop(context),
+            onTap: () => _ir(context, const TelaMatricula()),
           ),
           ListTile(
             title: const Text('Consultas'),
-            onTap: () => Navigator.pop(context),
+            onTap: () => _ir(context, const TelaConsulta()),
           ),
           ListTile(
             title: const Text('Sair'),
