@@ -6,6 +6,7 @@ import 'package:projetoescola/widgets/escola_pagina.dart';
 
 class TelaFormDisciplina extends StatefulWidget {
   const TelaFormDisciplina({super.key, required this.controller, this.disciplina});
+
   final DisciplinaController controller;
   final Disciplina? disciplina;
 
