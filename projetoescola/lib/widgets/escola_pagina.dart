@@ -4,6 +4,7 @@ import 'package:projetoescola/core/escola_ds.dart';
 import '../views/tela_aluno.dart';
 import '../views/tela_home.dart';
 import '../views/tela_login.dart';
+import '../views/tela_professor.dart'; // Importação da tela de professor
 import 'escola_rodape.dart';
 
 /// Estrutura comum das telas internas: barra azul, menu lateral e rodapé.
@@ -22,9 +23,8 @@ class EscolaPagina extends StatelessWidget {
   // Permite esconder o menu em telas secundárias, como o formulário.
   final bool comMenu;
 
-  // Itens do menu que ainda não têm tela.
+  // Itens restantes que ainda usam o comportamento padrão de fechar o menu.
   static const _outros = [
-    'Professores',
     'Turmas',
     'Disciplinas',
     'Matrículas',
@@ -61,6 +61,11 @@ class EscolaPagina extends StatelessWidget {
           ListTile(
             title: const Text('Alunos'),
             onTap: () => _ir(context, const TelaAlunos()),
+          ),
+          // Link direto para abrir a tela de professores corretamente
+          ListTile(
+            title: const Text('Professores'),
+            onTap: () => _ir(context, const TelaProfessor()),
           ),
           for (final item in _outros)
             ListTile(title: Text(item), onTap: () => Navigator.pop(context)),
