@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:projetoescola/core/escola_ds.dart';
+import 'package:projetoescola/widgets/escola_cartao.dart';
+import 'package:projetoescola/widgets/escola_pagina.dart';
 
 class TelaConsulta extends StatefulWidget {
   const TelaConsulta({super.key});
@@ -8,61 +11,109 @@ class TelaConsulta extends StatefulWidget {
 }
 
 class _TelaConsultaState extends State<TelaConsulta> {
-  // Lista geral de exemplo (pode adaptar para buscar alunos, turmas ou disciplinas)
-  final List<String> _itensGerais = [
-    'Ana Souza (Matemática)',
-    'Pedro Lima (História)',
-    'Turma A - Manhã',
-    'Turma B - Tarde',
-    'Matemática (80h)',
-    'História (60h)',
-  ];
+  final TextEditingController _searchController = TextEditingController();
 
-  String _termoBusca = '';
+  final List<Map<String, String>> _registos = [
+    {'titulo': 'Ana Souza (Matemática)', 'tipo': 'Aluno/Disciplina'},
+    {'titulo': 'Pedro Lima (História)', 'tipo': 'Aluno/Disciplina'},
+    {'titulo': 'Turma A - Manhã', 'tipo': 'Turma'},
+    {'titulo': 'Turma B - Tarde', 'tipo': 'Turma'},
+    {'titulo': 'Matemática (80h)', 'tipo': 'Disciplina'},
+    {'titulo': 'História (60h)', 'tipo': 'Disciplina'},
+  ];
 
   @override
   Widget build(BuildContext context) {
-    // Filtra os itens com base no texto digitado
-    final itensFiltrados = _itensGerais
-        .where((item) => item.toLowerCase().contains(_termoBusca.toLowerCase()))
-        .toList();
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Consultar Registos')),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          children: [
-            TextField(
-              decoration: const InputDecoration(
-                labelText: 'Pesquisar...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+    return EscolaPagina(
+      titulo: 'Consultar Registos',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Botão de destaque superior (igual aos outros módulos)
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
               ),
-              onChanged: (valor) {
-                setState(() {
-                  _termoBusca = valor;
-                });
-              },
             ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: itensFiltrados.isEmpty
-                  ? const Center(child: Text('Nenhum registo encontrado'))
-                  : ListView.builder(
-                      itemCount: itensFiltrados.length,
-                      itemBuilder: (context, index) {
-                        return Card(
-                          child: ListTile(
-                            leading: const Icon(Icons.check_circle_outline),
-                            title: Text(itensFiltrados[index]),
-                          ),
-                        );
-                      },
+            onPressed: () {
+              // Ação de relatório geral ou filtro
+            },
+            child: const Text(
+              'Gerar Relatório Geral',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Caixa de pesquisa com cor de fundo e ícone destacado
+          TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Pesquisar registos...',
+              prefixIcon: const Icon(Icons.search, color: EscolaDS.azul),
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(24),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            onChanged: (value) {
+              setState(() {});
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Lista de itens em cartões com detalhes coloridos
+          ..._registos.map((item) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: EscolaCartao(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: EscolaDS.azul.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.check_circle_outline, color: EscolaDS.azul),
                     ),
-            ),
-          ],
-        ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item['titulo']!,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            item['tipo']!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ],
       ),
     );
   }
