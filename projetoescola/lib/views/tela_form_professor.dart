@@ -1,82 +1,102 @@
 import 'package:flutter/material.dart';
 import 'package:projetoescola/controllers/professor_controller.dart';
 import 'package:projetoescola/models/professor.dart';
+import 'package:projetoescola/widgets/escola_cartao.dart';
+import 'package:projetoescola/widgets/escola_pagina.dart';
 
 class TelaFormProfessor extends StatefulWidget {
+  const TelaFormProfessor({
+    super.key,
+    required this.controller,
+    this.professor,
+  });
+
   final ProfessorController controller;
   final Professor? professor;
-
-  const TelaFormProfessor({Key? key, required this.controller, this.professor}) : super(key: key);
 
   @override
   State<TelaFormProfessor> createState() => _TelaFormProfessorState();
 }
 
 class _TelaFormProfessorState extends State<TelaFormProfessor> {
-  final _nomeController = TextEditingController();
-  final _cpfController = TextEditingController();
-  final _telefoneController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  late String _nome;
+  late String _cpf;
+  late String _telefone;
 
   @override
   void initState() {
     super.initState();
-    if (widget.professor != null) {
-      _nomeController.text = widget.professor!.nome;
-      _cpfController.text = widget.professor!.cpf;
-      _telefoneController.text = widget.professor!.telefone;
-    }
+    _nome = widget.professor?.nome ?? '';
+    _cpf = widget.professor?.cpf ?? '';
+    _telefone = widget.professor?.telefone ?? '';
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.professor == null ? 'Novo Professor' : 'Editar Professor'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _nomeController,
-              decoration: const InputDecoration(labelText: 'Nome'),
-            ),
-            TextField(
-              controller: _cpfController,
-              decoration: const InputDecoration(labelText: 'CPF'),
-              enabled: widget.professor == null,
-            ),
-            TextField(
-              controller: _telefoneController,
-              decoration: const InputDecoration(labelText: 'Telefone'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                if (widget.professor == null) {
-                  bool sucesso = widget.controller.cadastrar(
-                    _nomeController.text,
-                    _cpfController.text,
-                    _telefoneController.text,
-                  );
-                  if (!sucesso) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('CPF já cadastrado!')),
-                    );
-                    return;
+    final editando = widget.professor != null;
+    return EscolaPagina(
+      titulo: editando ? 'Editar Professor' : 'Novo Professor',
+      comMenu: false,
+      child: EscolaCartao(
+        padding: const EdgeInsets.all(24),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                initialValue: _nome,
+                decoration: const InputDecoration(labelText: 'Nome'),
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Informe o nome' : null,
+                onSaved: (value) => _nome = value!,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                initialValue: _cpf,
+                enabled: !editando, // Desativa a edição do CPF para não alterar a chave
+                decoration: const InputDecoration(labelText: 'CPF'),
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Informe o CPF' : null,
+                onSaved: (value) => _cpf = value!,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                initialValue: _telefone,
+                decoration: const InputDecoration(labelText: 'Telefone'),
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Informe o telefone' : null,
+                onSaved: (value) => _telefone = value!,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green, // Cor verde pedida
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24), // Bordas arredondadas
+                  ),
+                ),
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+                    if (editando) {
+                      widget.controller.editar(widget.professor!, _nome, _telefone);
+                    } else {
+                      widget.controller.cadastrar(_nome, _cpf, _telefone);
+                    }
+                    Navigator.pop(context);
                   }
-                } else {
-                  widget.controller.editar(
-                    widget.professor!,
-                    _nomeController.text,
-                    _telefoneController.text,
-                  );
-                }
-                Navigator.pop(context);
-              },
-              child: const Text('Salvar'),
-            ),
-          ],
+                },
+                child: Text(
+                  editando ? 'Salvar Alterações' : 'Cadastrar',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
