@@ -1,3 +1,4 @@
+
 class Aluno {
   final int id;
   final String cpf;
@@ -5,5 +6,5 @@ class Aluno {
   String nome;
   String telefone;
 
-  Aluno(this.id, this.cpf, this.nome, this.telefone);
+  Aluno(this.id, this.nome, this.cpf, this.telefone);
 }
