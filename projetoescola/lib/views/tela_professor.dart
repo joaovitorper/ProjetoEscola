@@ -41,7 +41,7 @@ class _TelaProfessorState extends State<TelaProfessor> {
                 final prof = lista[index];
                 return ListTile(
                   title: Text(prof.nome),
-                  subtitle: Text('CPF: ${prof.cpf} - Tel: ${prof.telefone}'),
+                  subtitle: Text('CPF: ${prof.cpf} | Tel: ${prof.telefone}'), // Corrigido aqui
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
