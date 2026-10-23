@@ -1,94 +1,79 @@
 import 'package:flutter/material.dart';
-import '../models/disciplina.dart';
+import 'package:projetoescola/controllers/disciplina_controller.dart';
+import 'package:projetoescola/models/disciplina.dart';
+import 'package:projetoescola/widgets/escola_cartao.dart';
+import 'package:projetoescola/widgets/escola_pagina.dart';
 
 class TelaFormDisciplina extends StatefulWidget {
+  const TelaFormDisciplina({super.key, required this.controller, this.disciplina});
+  final DisciplinaController controller;
   final Disciplina? disciplina;
-
-  const TelaFormDisciplina({super.key, this.disciplina});
 
   @override
   State<TelaFormDisciplina> createState() => _TelaFormDisciplinaState();
 }
+
 class _TelaFormDisciplinaState extends State<TelaFormDisciplina> {
   final _formKey = GlobalKey<FormState>();
   late String _nome;
-  late int _cargaHoraria;
-  late String _ementa;
+  late String _cargaHoraria;
 
   @override
   void initState() {
     super.initState();
-    if (widget.disciplina != null) {
-      _nome = widget.disciplina!.nome;
-      _cargaHoraria = widget.disciplina!.cargaHoraria;
-      _ementa = widget.disciplina!.ementa;
-    } else {
-      _nome = '';
-      _cargaHoraria = 60;
-      _ementa = '';
-    }
-  }
-
-  void _salvar() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-
-      final novaDisciplina = Disciplina(
-        id: widget.disciplina?.id,
-        nome: _nome,
-        cargaHoraria: _cargaHoraria,
-        ementa: _ementa,
-      );
-
-      Navigator.pop(context, novaDisciplina);
-    }
+    _nome = widget.disciplina?.nome ?? '';
+    _cargaHoraria = widget.disciplina?.cargaHoraria ?? '';
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.disciplina == null ? 'Nova Disciplina' : 'Editar Disciplina'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+    final editando = widget.disciplina != null;
+    return EscolaPagina(
+      titulo: editando ? 'Editar Disciplina' : 'Nova Disciplina',
+      comMenu: false,
+      child: EscolaCartao(
+        padding: const EdgeInsets.all(24),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
                 initialValue: _nome,
                 decoration: const InputDecoration(labelText: 'Nome da Disciplina'),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Informe o nome' : null,
+                validator: (value) => value == null || value.isEmpty ? 'Informe o nome' : null,
                 onSaved: (value) => _nome = value!,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               TextFormField(
-                initialValue: _cargaHoraria.toString(),
-                decoration: const InputDecoration(labelText: 'Carga Horária (horas)'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || int.tryParse(value) == null) {
-                    return 'Informe um número válido';
-                  }
-                  return null;
-                },
-                onSaved: (value) => _cargaHoraria = int.parse(value!),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                initialValue: _ementa,
-                decoration: const InputDecoration(labelText: 'Ementa / Descrição'),
-                maxLines: 3,
-                validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Informe a ementa' : null,
-                onSaved: (value) => _ementa = value!,
+                initialValue: _cargaHoraria,
+                decoration: const InputDecoration(labelText: 'Carga Horária'),
+                validator: (value) => value == null || value.isEmpty ? 'Informe a carga horária' : null,
+                onSaved: (value) => _cargaHoraria = value!,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _salvar,
-                child: const Text('Salvar'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                ),
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+                    if (editando) {
+                      widget.controller.editar(widget.disciplina!.id!, _nome, _cargaHoraria);
+                    } else {
+                      widget.controller.cadastrar(_nome, _cargaHoraria);
+                    }
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text(
+                  editando ? 'Salvar Alterações' : 'Cadastrar',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
