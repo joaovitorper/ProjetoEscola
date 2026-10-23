@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:projetoescola/core/escola_ds.dart';
 import 'package:projetoescola/widgets/escola_cartao.dart';
 import 'package:projetoescola/widgets/escola_pagina.dart';
+import 'package:projetoescola/views/tela_relatorio.dart'; // Importa a tela de relatório
 
 class TelaConsulta extends StatefulWidget {
   const TelaConsulta({super.key});
@@ -29,27 +30,32 @@ class _TelaConsultaState extends State<TelaConsulta> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Botão de destaque superior (igual aos outros módulos)
+          // Botão para abrir o relatório sem perder o contexto
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
               ),
             ),
             onPressed: () {
-              // Ação de relatório geral ou filtro
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TelaRelatorio(),
+                ),
+              );
             },
             child: const Text(
-              'Gerar Relatório Geral',
+              'Gerar Relatório',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 16),
 
-          // Caixa de pesquisa com cor de fundo e ícone destacado
+          // Caixa de pesquisa
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
@@ -68,7 +74,7 @@ class _TelaConsultaState extends State<TelaConsulta> {
           ),
           const SizedBox(height: 16),
 
-          // Lista de itens em cartões com detalhes coloridos
+          // Lista de itens em cartões
           ..._registos.map((item) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12.0),
