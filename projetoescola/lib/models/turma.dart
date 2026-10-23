@@ -1,5 +1,5 @@
 class Turma {
-  final int id;
+  final int? id; // Alterado para opcional (nullable)
   final String nome;
   final String disciplina;
   final String professor;
@@ -7,7 +7,7 @@ class Turma {
   final int vagas;
 
   const Turma({
-    required this.id,
+    this.id,
     required this.nome,
     required this.disciplina,
     required this.professor,
@@ -46,7 +46,7 @@ class Turma {
 
   factory Turma.fromMap(Map<String, dynamic> map) {
     return Turma(
-      id: map['id'] as int,
+      id: map['id'] as int?,
       nome: map['nome'] as String,
       disciplina: map['disciplina'] as String,
       professor: map['professor'] as String,

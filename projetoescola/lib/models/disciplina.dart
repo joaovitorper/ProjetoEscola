@@ -1,27 +1,27 @@
 class Disciplina {
-  final int id;
+  final int? id;
   final String nome;
   final int cargaHoraria;
-  final String descricao;
+  final String ementa;
 
-  const Disciplina({
-    required this.id,
+  Disciplina({
+    this.id,
     required this.nome,
     required this.cargaHoraria,
-    required this.descricao,
+    required this.ementa,
   });
 
   Disciplina copyWith({
     int? id,
     String? nome,
     int? cargaHoraria,
-    String? descricao,
+    String? ementa,
   }) {
     return Disciplina(
       id: id ?? this.id,
       nome: nome ?? this.nome,
       cargaHoraria: cargaHoraria ?? this.cargaHoraria,
-      descricao: descricao ?? this.descricao,
+      ementa: ementa ?? this.ementa,
     );
   }
 
@@ -30,16 +30,16 @@ class Disciplina {
       'id': id,
       'nome': nome,
       'cargaHoraria': cargaHoraria,
-      'descricao': descricao,
+      'ementa': ementa,
     };
   }
 
   factory Disciplina.fromMap(Map<String, dynamic> map) {
     return Disciplina(
-      id: map['id'] as int,
+      id: map['id'] as int?,
       nome: map['nome'] as String,
       cargaHoraria: map['cargaHoraria'] as int,
-      descricao: map['descricao'] as String,
+      ementa: map['ementa'] as String,
     );
   }
 }
