@@ -1,92 +1,115 @@
 import 'package:flutter/material.dart';
-import '../models/turma.dart';
-import 'tela_form_turma.dart';
+import 'package:projetoescola/controllers/turma_controller.dart';
+import 'package:projetoescola/models/turma.dart';
+import 'package:projetoescola/views/tela_form_turma.dart';
 
 class TelaTurma extends StatefulWidget {
-  const TelaTurma({super.key});
+  const TelaTurma({Key? key}) : super(key: key);
 
   @override
   State<TelaTurma> createState() => _TelaTurmaState();
 }
 
 class _TelaTurmaState extends State<TelaTurma> {
-  final List<Turma> _turmas = [
-    Turma(
-      id: 1,
-      nome: 'Turma A',
-      disciplina: 'Matemática',
-      professor: 'Carlos Silva',
-      turno: 'Manhã',
-      vagas: 30,
-    ),
-    Turma(
-      id: 2,
-      nome: 'Turma B',
-      disciplina: 'História',
-      professor: 'Ana Souza',
-      turno: 'Tarde',
-      vagas: 25,
-    ),
-  ];
+  final TurmaController _controller = TurmaController();
 
-  int _proximoId = 3;
-
-  Future<void> _abrirFormulario({Turma? turma}) async {
-    final resultado = await Navigator.push<Turma>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => TelaFormTurma(turma: turma),
-      ),
-    );
-
-    if (resultado == null) return;
-
-    setState(() {
-      if (turma == null) {
-        _turmas.add(resultado.copyWith(id: _proximoId++));
-      } else {
-        final i = _turmas.indexWhere((t) => t.id == turma.id);
-        _turmas[i] = resultado;
-      }
-    });
-  }
-
-  void _excluir(Turma turma) {
-    setState(() => _turmas.removeWhere((t) => t.id == turma.id));
+  void _atualizarTela() {
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final turmas = _controller.listar();
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Turmas')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _abrirFormulario(),
-        child: const Icon(Icons.add),
+      appBar: AppBar(
+        title: const Text('Lista de Turmas'),
       ),
-      body: _turmas.isEmpty
-          ? const Center(child: Text('Nenhuma turma cadastrada'))
-          : ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: _turmas.length,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: () async {
+                // Abre o formulário para cadastrar nova turma
+                final Turma? novaTurma = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TelaFormTurma(),
+                  ),
+                );
+
+                if (novaTurma != null) {
+                  _controller.cadastrar(
+                    novaTurma.nome,
+                    novaTurma.disciplina,
+                    novaTurma.professor,
+                    novaTurma.turno,
+                    novaTurma.vagas,
+                  );
+                  _atualizarTela();
+                }
+              },
+              child: const Text('Cadastrar Nova Turma'),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: turmas.length,
               itemBuilder: (context, index) {
-                final t = _turmas[index];
+                final turma = turmas[index];
                 return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: ListTile(
-                    leading: CircleAvatar(child: Text(t.nome[0])),
-                    title: Text('${t.nome} - ${t.disciplina}'),
+                    title: Text(turma.nome),
                     subtitle: Text(
-                      'Professor: ${t.professor}\nTurno: ${t.turno} | Vagas: ${t.vagas}',
+                      'Disciplina: ${turma.disciplina}\nProfessor: ${turma.professor} | Turno: ${turma.turno} | Vagas: ${turma.vagas}',
                     ),
                     isThreeLine: true,
-                    onTap: () => _abrirFormulario(turma: t),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () => _excluir(t),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Botão de Editar
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () async {
+                            final Turma? turmaEditada = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TelaFormTurma(turma: turma),
+                              ),
+                            );
+
+                            if (turmaEditada != null) {
+                              _controller.editar(
+                                turma.id!,
+                                turmaEditada.nome,
+                                turmaEditada.disciplina,
+                                turmaEditada.professor,
+                                turmaEditada.turno,
+                                turmaEditada.vagas,
+                              );
+                              _atualizarTela();
+                            }
+                          },
+                        ),
+                        // Botão de Excluir
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            _controller.excluir(turma);
+                            _atualizarTela();
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 );
               },
             ),
+          ),
+        ],
+      ),
     );
   }
 }

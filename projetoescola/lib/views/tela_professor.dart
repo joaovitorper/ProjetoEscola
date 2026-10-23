@@ -1,106 +1,76 @@
 import 'package:flutter/material.dart';
-import '../models/professor.dart';
+import 'package:projetoescola/controllers/professor_controller.dart';
+import 'package:projetoescola/views/tela_form_professor.dart';
 
-class TelaFormProfessor extends StatefulWidget {
-  // Se vier um professor, é edição. Se vier null, é cadastro.
-  final Professor? professor;
-
-  const TelaFormProfessor({super.key, this.professor});
+class TelaProfessor extends StatefulWidget {
+  const TelaProfessor({Key? key}) : super(key: key);
 
   @override
-  State<TelaFormProfessor> createState() => _TelaFormProfessorState();
+  State<TelaProfessor> createState() => _TelaProfessorState();
 }
 
-class _TelaFormProfessorState extends State<TelaFormProfessor> {
-  final _formKey = GlobalKey<FormState>();
+class _TelaProfessorState extends State<TelaProfessor> {
+  final ProfessorController _controller = ProfessorController();
 
-  late final TextEditingController _nomeCtrl;
-  late final TextEditingController _emailCtrl;
-  late final TextEditingController _disciplinaCtrl;
-  late final TextEditingController _telefoneCtrl;
-
-  bool get _editando => widget.professor != null;
-
-  @override
-  void initState() {
-    super.initState();
-    final p = widget.professor;
-    _nomeCtrl = TextEditingController(text: p?.nome ?? '');
-    _emailCtrl = TextEditingController(text: p?.email ?? '');
-    _disciplinaCtrl = TextEditingController(text: p?.disciplina ?? '');
-    _telefoneCtrl = TextEditingController(text: p?.telefone ?? '');
-  }
-
-  @override
-  void dispose() {
-    _nomeCtrl.dispose();
-    _emailCtrl.dispose();
-    _disciplinaCtrl.dispose();
-    _telefoneCtrl.dispose();
-    super.dispose();
-  }
-
-  void _salvar() {
-    if (!_formKey.currentState!.validate()) return;
-
-    final professor = Professor(
-      id: widget.professor?.id ?? 0, // id 0 = novo; a lista define o id real
-      nome: _nomeCtrl.text.trim(),
-      email: _emailCtrl.text.trim(),
-      disciplina: _disciplinaCtrl.text.trim(),
-      telefone: _telefoneCtrl.text.trim(),
-    );
-
-    // Devolve o professor para a tela que abriu o formulário.
-    Navigator.pop(context, professor);
-  }
+  void _atualizar() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
+    final lista = _controller.listar();
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_editando ? 'Editar professor' : 'Novo professor'),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            TextFormField(
-              controller: _nomeCtrl,
-              decoration: const InputDecoration(labelText: 'Nome'),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Informe o nome' : null,
+      appBar: AppBar(title: const Text('Lista de Professores')),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TelaFormProfessor(controller: _controller)),
+                );
+                _atualizar();
+              },
+              child: const Text('Cadastrar Novo Professor'),
             ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _emailCtrl,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'E-mail'),
-              validator: (v) =>
-                  (v == null || !v.contains('@')) ? 'E-mail inválido' : null,
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: lista.length,
+              itemBuilder: (context, index) {
+                final prof = lista[index];
+                return ListTile(
+                  title: Text(prof.nome),
+                  subtitle: Text('CPF: ${prof.cpf} - Tel: ${prof.telefone}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TelaFormProfessor(controller: _controller, professor: prof),
+                            ),
+                          );
+                          _atualizar();
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          _controller.excluir(prof);
+                          _atualizar();
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _disciplinaCtrl,
-              decoration: const InputDecoration(labelText: 'Disciplina'),
-              validator: (v) => (v == null || v.trim().isEmpty)
-                  ? 'Informe a disciplina'
-                  : null,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _telefoneCtrl,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(labelText: 'Telefone'),
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: _salvar,
-              child: const Text('Salvar'),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

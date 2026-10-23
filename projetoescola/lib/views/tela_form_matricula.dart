@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/matricula.dart';
+import 'package:projetoescola/models/matricula.dart';
 
 class TelaFormMatricula extends StatefulWidget {
   final Matricula? matricula;
@@ -13,23 +13,20 @@ class TelaFormMatricula extends StatefulWidget {
 class _TelaFormMatriculaState extends State<TelaFormMatricula> {
   final _formKey = GlobalKey<FormState>();
   late String _aluno;
-  late String _disciplina;
-  late DateTime _data;
-  late String _situacao;
+  late String _turma;
+  late String _dataMatricula;
 
   @override
   void initState() {
     super.initState();
     if (widget.matricula != null) {
       _aluno = widget.matricula!.aluno;
-      _disciplina = widget.matricula!.disciplina;
-      _data = widget.matricula!.data;
-      _situacao = widget.matricula!.situacao;
+      _turma = widget.matricula!.turma;
+      _dataMatricula = widget.matricula!.dataMatricula;
     } else {
       _aluno = '';
-      _disciplina = '';
-      _data = DateTime.now();
-      _situacao = 'Ativa';
+      _turma = '';
+      _dataMatricula = '';
     }
   }
 
@@ -38,11 +35,10 @@ class _TelaFormMatriculaState extends State<TelaFormMatricula> {
       _formKey.currentState!.save();
 
       final novaMatricula = Matricula(
-        id: widget.matricula?.id ?? 0, // O ID real é tratado na tela anterior
+        id: widget.matricula?.id,
         aluno: _aluno,
-        disciplina: _disciplina,
-        data: _data,
-        situacao: _situacao,
+        turma: _turma,
+        dataMatricula: _dataMatricula,
       );
 
       Navigator.pop(context, novaMatricula);
@@ -63,40 +59,26 @@ class _TelaFormMatriculaState extends State<TelaFormMatricula> {
             children: [
               TextFormField(
                 initialValue: _aluno,
-                decoration: const InputDecoration(labelText: 'Aluno'),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Por favor, informe o nome do aluno.';
-                  }
-                  return null;
-                },
+                decoration: const InputDecoration(labelText: 'Nome do Aluno'),
+                validator: (value) =>
+                    value == null || value.trim().isEmpty ? 'Informe o aluno' : null,
                 onSaved: (value) => _aluno = value!,
               ),
               const SizedBox(height: 12),
               TextFormField(
-                initialValue: _disciplina,
-                decoration: const InputDecoration(labelText: 'Disciplina'),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Por favor, informe a disciplina.';
-                  }
-                  return null;
-                },
-                onSaved: (value) => _disciplina = value!,
+                initialValue: _turma,
+                decoration: const InputDecoration(labelText: 'Turma'),
+                validator: (value) =>
+                    value == null || value.trim().isEmpty ? 'Informe a turma' : null,
+                onSaved: (value) => _turma = value!,
               ),
-              DropdownButtonFormField<String>(
-                initialValue: _situacao, // Alterado de 'value' para 'initialValue'
-                decoration: const InputDecoration(labelText: 'Situação'),
-                items: const [
-                  DropdownMenuItem(value: 'Ativa', child: Text('Ativa')),
-                  DropdownMenuItem(value: 'Trancada', child: Text('Trancada')),
-                  DropdownMenuItem(value: 'Concluída', child: Text('Concluída')),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    _situacao = value!;
-                  });
-                },
+              const SizedBox(height: 12),
+              TextFormField(
+                initialValue: _dataMatricula,
+                decoration: const InputDecoration(labelText: 'Data da Matrícula (ex: 10/02/2026)'),
+                validator: (value) =>
+                    value == null || value.trim().isEmpty ? 'Informe a data' : null,
+                onSaved: (value) => _dataMatricula = value!,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
